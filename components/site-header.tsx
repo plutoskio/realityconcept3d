@@ -1,89 +1,78 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
-import { Logo } from '@/components/logo'
-import { cn } from '@/lib/utils'
+import { useEffect, useState } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { Logo } from "./logo";
 
-const navItems = [
-  { href: '/#vantagens', label: 'Vantagens' },
-  { href: '/#como-funciona', label: 'Como funciona' },
-  { href: '/#faq', label: 'FAQ' },
-  { href: '/#contacto', label: 'Contacto' },
-]
+const links = [
+  { href: "/#modelos", label: "Experiências" },
+  { href: "/#como-funciona", label: "O processo" },
+  { href: "/#faq", label: "Perguntas" },
+];
 
 export function SiteHeader() {
-  const [open, setOpen] = useState(false)
-
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
+  }, [open]);
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
+      <a className="skip-link" href="#conteudo">
+        Saltar para o conteúdo
+      </a>
+      <div className="header-inner">
         <Logo />
-
-        <nav aria-label="Navegação principal" className="hidden md:block">
-          <ul className="flex items-center gap-8">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <nav className="desktop-nav" aria-label="Navegação principal">
+          {links.map((link) => (
+            <a key={link.href} href={link.href}>
+              {link.label}
+            </a>
+          ))}
         </nav>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/#contacto"
-            className="hidden h-9 items-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 sm:inline-flex"
-          >
-            Agendar Demonstração
-          </Link>
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            className="flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted md:hidden"
-          >
-            {open ? <X className="size-5" /> : <Menu className="size-5" />}
-            <span className="sr-only">{open ? 'Fechar menu' : 'Abrir menu'}</span>
-          </button>
-        </div>
+        <a className="header-contact" href="/#contacto">
+          Vamos conversar <ArrowUpRight size={16} />
+        </a>
+        <button
+          className="menu-toggle"
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
+        >
+          {open ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
-
       <nav
         id="mobile-nav"
+        className={`mobile-nav ${open ? "is-open" : ""}`}
         aria-label="Navegação móvel"
-        className={cn('border-t border-border md:hidden', open ? 'block' : 'hidden')}
+        inert={!open}
       >
-        <ul className="flex flex-col px-6 py-4">
-          {navItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="block py-3 text-base text-muted-foreground hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-          <li className="pt-3">
-            <Link
-              href="/#contacto"
-              onClick={() => setOpen(false)}
-              className="flex h-11 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground"
-            >
-              Agendar Demonstração
-            </Link>
-          </li>
-        </ul>
+        {links.map((link, i) => (
+          <a key={link.href} href={link.href} onClick={() => setOpen(false)}>
+            <span>0{i + 1}</span>
+            {link.label}
+            <ArrowUpRight />
+          </a>
+        ))}
+        <a href="/#contacto" onClick={() => setOpen(false)}>
+          <span>04</span>Vamos conversar
+          <ArrowUpRight />
+        </a>
       </nav>
     </header>
-  )
+  );
 }
