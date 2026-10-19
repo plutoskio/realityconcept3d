@@ -1,34 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Globe2, Menu, X } from "lucide-react";
 import { Logo } from "./logo";
-
 const links = [
-  { href: "/#modelos", label: "Experiências" },
-  { href: "/#como-funciona", label: "O processo" },
-  { href: "/#faq", label: "Perguntas" },
+  { href: "/#como-funciona", label: "Como funciona" },
+  { href: "/#introducao", label: "O que fazemos" },
+  { href: "/#faq", label: "FAQ" },
+  { href: "/#modelos", label: "Demo ao vivo" },
 ];
-
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const toggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!open) return;
     const keydown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        toggle.current?.focus();
+      }
     };
     window.addEventListener("keydown", keydown);
     return () => window.removeEventListener("keydown", keydown);
   }, [open]);
   return (
-    <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
+    <header className="site-header">
       <a className="skip-link" href="#conteudo">
         Saltar para o conteúdo
       </a>
@@ -41,10 +37,14 @@ export function SiteHeader() {
             </a>
           ))}
         </nav>
-        <a className="header-contact" href="/#contacto">
-          Vamos conversar <ArrowUpRight size={16} />
+        <span className="header-language" aria-label="Idioma: Português">
+          <Globe2 size={14} /> PT
+        </span>
+        <a className="button button-primary header-contact" href="/contacto">
+          Marcar uma demo
         </a>
         <button
+          ref={toggle}
           className="menu-toggle"
           type="button"
           onClick={() => setOpen(!open)}
@@ -61,16 +61,13 @@ export function SiteHeader() {
         aria-label="Navegação móvel"
         inert={!open}
       >
-        {links.map((link, i) => (
+        {links.map((link) => (
           <a key={link.href} href={link.href} onClick={() => setOpen(false)}>
-            <span>0{i + 1}</span>
             {link.label}
-            <ArrowUpRight />
           </a>
         ))}
-        <a href="/#contacto" onClick={() => setOpen(false)}>
-          <span>04</span>Vamos conversar
-          <ArrowUpRight />
+        <a href="/contacto" onClick={() => setOpen(false)}>
+          Marcar uma demo
         </a>
       </nav>
     </header>

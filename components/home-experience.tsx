@@ -1,64 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Check,
-  Expand,
-  Plus,
-} from "lucide-react";
-import { Hero } from "./hero";
+import { ArrowDown, ArrowRight, Camera, Expand, QrCode } from "lucide-react";
 import dynamic from "next/dynamic";
+import { Hero } from "./hero";
+import { RoiCalculator } from "./roi-calculator";
+import { InteractiveProduct } from "./interactive-product";
+import type { ModelKind } from "./model-viewer";
+
 const ExperienceDialog = dynamic(
   () => import("./experience-dialog").then((module) => module.ExperienceDialog),
   { ssr: false },
 );
-import type { ModelKind } from "./model-viewer";
-import { ContactSection } from "./contact-section";
-
 const steps = [
   {
-    title: "O seu produto é o ponto de partida.",
-    label: "PARTILHAR",
-    text: "Envie fotografias, medidas e referências de materiais. Conhecemos a sua peça, o seu catálogo e o que torna a sua marca única.",
-    detail: "Fotografias + medidas + acabamentos",
+    title: "Partilhe o seu produto",
+    text: "Envie fotografias de vários ângulos, medidas e referências de materiais. O seu catálogo é o nosso ponto de partida.",
   },
   {
-    title: "Nós damos-lhe uma nova dimensão.",
-    label: "CRIAR",
-    text: "Modelamos a geometria, trabalhamos as texturas e afinamos a luz. Revê e aprova cada detalhe antes de o modelo ficar online.",
-    detail: "Modelação 3D + materiais + aprovação",
+    title: "Nós criamos a versão 3D",
+    text: "Trabalhamos a forma, as texturas e os acabamentos. A sua equipa revê e aprova o modelo antes da publicação.",
   },
   {
-    title: "Pronto para entrar em qualquer casa.",
-    label: "ATIVAR",
-    text: "Entregamos a experiência 3D e AR integrada na sua loja. Os seus clientes podem explorar e experimentar, diretamente no navegador.",
-    detail: "Integração + alojamento + acompanhamento",
+    title: "A experiência entra na sua loja",
+    text: "Integramos o visualizador na página do produto. O cliente roda a peça e experimenta-a no seu espaço com AR.",
   },
 ];
 const faqs = [
   [
+    "Preciso de ter modelos 3D?",
+    "Não. Podemos começar com fotografias, medidas e referências dos materiais. Se já tiver ficheiros 3D, avaliamos a geometria e preparamo-los para funcionar no navegador.",
+  ],
+  [
+    "Quanto tempo demora um projeto?",
+    "O calendário depende do número de produtos, da complexidade e dos acabamentos. Depois de conhecer as peças, enviamos uma proposta com as etapas e os prazos de entrega.",
+  ],
+  [
+    "Funciona na minha loja online?",
+    "A experiência pode ser incorporada em Shopify, WooCommerce ou num website à medida. Avaliamos a sua plataforma e tratamos da integração durante o projeto.",
+  ],
+  [
+    "Posso rever o modelo antes de publicar?",
+    "Sim. A aprovação faz parte do processo: revê a forma, os materiais e os detalhes antes de a experiência ficar disponível para os seus clientes.",
+  ],
+  [
+    "Como avaliamos o impacto?",
+    "Podemos definir um piloto com uma seleção de produtos e comparar a interação e a conversão ao longo do tempo. Os resultados dependem do catálogo, do tráfego e da implementação.",
+  ],
+  [
     "É preciso instalar uma aplicação?",
-    "Não. A experiência 3D funciona no navegador. Em telemóveis compatíveis, a Realidade Aumentada abre através do Safari ou Chrome, sem instalar uma aplicação. A disponibilidade de AR depende do dispositivo.",
-  ],
-  [
-    "E se ainda não tiver modelos 3D?",
-    "Começamos pelas suas fotografias, medidas e referências de materiais. Tratamos da modelação e otimização de cada peça. Se já tiver modelos 3D, podemos avaliar e preparar os seus ficheiros.",
-  ],
-  [
-    "Funciona com a minha loja online?",
-    "A experiência pode ser incorporada em plataformas como Shopify e WooCommerce, ou num website à medida. Avaliamos a sua loja e tratamos da integração durante o projeto.",
-  ],
-  [
-    "Quanto custa e quanto tempo demora?",
-    "Depende do número de peças, da complexidade e dos acabamentos. Depois de conhecer o catálogo, enviamos uma proposta com âmbito, preço e calendário. A primeira conversa é gratuita e sem compromisso.",
+    "O visualizador 3D funciona diretamente no navegador. A Realidade Aumentada está disponível em dispositivos iPhone e Android compatíveis; a disponibilidade depende do sistema e do navegador.",
   ],
 ];
-
 export function HomeExperience() {
   const [model, setModel] = useState<ModelKind | null>(null);
-  const [step, setStep] = useState(0);
   useEffect(() => {
     const incoming = new URLSearchParams(window.location.search).get("modelo");
     if (
@@ -69,15 +64,14 @@ export function HomeExperience() {
     )
       setModel(incoming);
     const observer = new IntersectionObserver(
-      (entries) => {
+      (entries) =>
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("revealed");
             observer.unobserve(entry.target);
           }
-        });
-      },
-      { threshold: 0.12 },
+        }),
+      { threshold: 0.1 },
     );
     document
       .querySelectorAll("[data-reveal]")
@@ -94,273 +88,223 @@ export function HomeExperience() {
   }
   return (
     <>
-      <Hero onExplore={() => setModel("atelier")} />
-      <section id="introducao" className="intro section-pad">
-        <div className="section-index" data-reveal>
-          <span className="eyebrow">01 / UMA OUTRA FORMA DE VER</span>
-          <ArrowDownRight size={22} strokeWidth={1.2} />
-        </div>
-        <div className="intro-main" data-reveal>
-          <h2>
-            Há peças que precisam
-            <br />
-            de ser vistas. <em>E sentidas.</em>
-          </h2>
-          <div className="intro-description">
-            <p>
-              Uma fotografia mostra o seu produto.
+      <Hero />
+      <section
+        id="introducao"
+        className="benefits-section section-block"
+        aria-labelledby="benefits-title"
+      >
+        <div className="page-container">
+          <div className="section-heading" data-reveal>
+            <p className="eyebrow">PORQUÊ 3D E AR</p>
+            <h2 id="benefits-title">
+              Mais detalhe para quem escolhe.
               <br />
-              Uma experiência aproxima-o de quem o vai escolher.
-            </p>
-            <p>
-              Criamos modelos 3D e experiências de Realidade Aumentada para
-              marcas de mobiliário e interiores. Para que cada cliente possa
-              explorar os detalhes — e descobrir como a peça fica em sua casa.
-            </p>
-          </div>
-        </div>
-        <div className="service-line" data-reveal>
-          <span>MODELAÇÃO 3D</span>
-          <span className="service-plus">+</span>
-          <span>REALIDADE AUMENTADA</span>
-          <span className="service-plus">+</span>
-          <span>INTEGRAÇÃO NA SUA LOJA</span>
-          <span className="service-end">
-            DO PRIMEIRO DETALHE AO ÚLTIMO CLIQUE <ArrowUpRight size={15} />
-          </span>
-        </div>
-      </section>
-      <section id="modelos" className="collection section-pad">
-        <div className="section-heading" data-reveal>
-          <div>
-            <span className="eyebrow">
-              02 / MENOS IMAGINAR. MAIS EXPERIMENTAR.
-            </span>
-            <h2>
-              Olhe mais <em>de perto.</em>
+              Mais possibilidades para a sua marca.
             </h2>
+            <p>
+              Uma imagem deixa perguntas por responder. O 3D aproxima os
+              materiais, revela a forma e leva cada peça ao espaço do cliente.
+            </p>
           </div>
-          <p>
-            Não fique só pela imagem.
-            <br />
-            Entre, rode e explore.
+          <div className="benefit-grid" data-reveal>
+            {[
+              [
+                "360°",
+                "Uma peça, todos os ângulos",
+                "Explore a forma e os materiais em 3D.",
+              ],
+              [
+                "1:1",
+                "Uma ideia real da escala",
+                "Experimente a peça no seu espaço com AR.",
+              ],
+              [
+                "0 apps",
+                "Do primeiro clique à experiência",
+                "Diretamente no navegador, em dispositivos compatíveis.",
+              ],
+            ].map(([value, title, description]) => (
+              <article className="benefit-card" key={value}>
+                <p className="benefit-value">{value}</p>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </article>
+            ))}
+          </div>
+          <div className="perspective-comparison" data-reveal>
+            <p className="eyebrow">O MESMO PRODUTO. UMA OUTRA PERSPETIVA.</p>
+            <div className="perspective-row">
+              <div>
+                <span>Imagem estática</span>
+                <span>Um ponto de vista</span>
+              </div>
+              <div className="perspective-track">
+                <span style={{ width: "32%" }} />
+              </div>
+            </div>
+            <div className="perspective-row interactive">
+              <div>
+                <span>Experiência 3D + AR</span>
+                <span>Explorar, rodar, experimentar</span>
+              </div>
+              <div className="perspective-track">
+                <span style={{ width: "100%" }} />
+              </div>
+            </div>
+            <p>Da observação à interação, na própria página do produto.</p>
+          </div>
+          <p className="section-footnote">
+            Uma experiência pensada para o seu catálogo, integrada na sua loja.
           </p>
         </div>
-        <div className="collection-grid">
-          <button
-            className="collection-item"
-            onClick={() => setModel("atelier")}
-            data-reveal
-            aria-label="Explorar poltrona em 3D"
-          >
-            <div className="collection-visual lounge-visual">
-              <span className="object-number">01 — ESTUDO DE TEXTURA</span>
-              <img
-                src="/images/atelier-chair-poster.webp"
-                alt="Poltrona em couro castanho com concha de madeira e base metálica"
-                width="1000"
-                height="1000"
-                loading="lazy"
-              />
-              <span className="collection-open">
-                <Expand size={20} strokeWidth={1.5} />
-              </span>
-              <span className="collection-hover">
-                EXPLORAR EM 3D <ArrowUpRight size={17} />
-              </span>
-            </div>
-            <div className="collection-caption">
-              <div>
-                <h3>Textura que se vê.</h3>
-                <span>Poltrona · Couro & madeira</span>
-              </div>
-              <ArrowUpRight size={24} strokeWidth={1.2} />
-            </div>
-          </button>
-          <button
-            className="collection-item collection-second"
-            onClick={() => setModel("mesa")}
-            data-reveal
-            aria-label="Explorar mesa circular em 3D"
-          >
-            <div className="collection-visual table-visual">
-              <span className="object-number">02 — ESTUDO DE FORMA</span>
-              <img
-                src="/images/coffee-table-poster.webp"
-                alt="Modelo tridimensional de uma mesa circular"
-                width="1000"
-                height="1000"
-                loading="lazy"
-              />
-              <span className="collection-open">
-                <Expand size={20} strokeWidth={1.5} />
-              </span>
-              <span className="collection-hover">
-                EXPLORAR EM 3D <ArrowUpRight size={17} />
-              </span>
-            </div>
-            <div className="collection-caption">
-              <div>
-                <h3>Forma que faz sentido.</h3>
-                <span>Mesa circular · Pedra & metal</span>
-              </div>
-              <ArrowUpRight size={24} strokeWidth={1.2} />
-            </div>
-          </button>
-        </div>
-        <p className="collection-disclaimer">
-          Uma seleção de modelos de demonstração para explorar a tecnologia.{" "}
-          <a href="/creditos">
-            Créditos dos modelos <ArrowUpRight size={12} />
-          </a>
-        </p>
       </section>
-      <section id="como-funciona" className="process section-pad">
-        <div className="process-title" data-reveal>
-          <span className="eyebrow">
-            03 / SIMPLES PARA SI. EXTRAORDINÁRIO PARA QUEM COMPRA.
-          </span>
-          <h2>
-            O seu catálogo.
-            <br />A nossa <em>perspetiva.</em>
-          </h2>
-          <p>
-            Da primeira fotografia ao botão na sua loja.
-            <br />
-            Tratamos de todo o processo.
-          </p>
-          <a href="#contacto" className="text-link">
-            Conte-nos o que tem em mente <ArrowUpRight size={17} />
-          </a>
-          <div className="process-spec">
-            <span>FOTOGRAFIA → MODELO → EXPERIÊNCIA</span>
-            <div className="process-progress" aria-hidden="true">
-              <span style={{ width: `${((step + 1) / 3) * 100}%` }} />
-            </div>
+      <section
+        id="como-funciona"
+        className="process-section section-block"
+        aria-labelledby="process-title"
+      >
+        <div className="page-container">
+          <div className="section-heading" data-reveal>
+            <p className="eyebrow">COMO FUNCIONA</p>
+            <h2 id="process-title">O seu produto. A nossa próxima criação.</h2>
+          </div>
+          <div className="process-grid">
+            {steps.map((step, i) => (
+              <article className="process-card" key={step.title} data-reveal>
+                <span className="step-number">{i + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </article>
+            ))}
+          </div>
+          <div className="section-action">
+            <a href="/contacto" className="button button-secondary">
+              Planear o meu projeto <ArrowRight size={16} />
+            </a>
           </div>
         </div>
-        <div className="process-steps" data-reveal>
-          {steps.map((item, i) => (
-            <div
-              className={`process-step ${step === i ? "is-active" : ""}`}
-              key={item.label}
-            >
-              <h3>
+      </section>
+      <RoiCalculator />
+      <section
+        id="modelos"
+        className="comparison-section section-block"
+        aria-labelledby="comparison-title"
+      >
+        <div className="page-container">
+          <div className="section-heading" data-reveal>
+            <p className="eyebrow">DA IMAGEM À EXPERIÊNCIA</p>
+            <h2 id="comparison-title">
+              A mesma peça. Uma nova forma de a descobrir.
+            </h2>
+            <p>
+              Veja a diferença entre uma imagem fixa e um produto que pode
+              explorar. Clique no modelo para começar.
+            </p>
+          </div>
+          <div className="comparison-grid" data-reveal>
+            <figure>
+              <div className="comparison-visual photo-visual">
+                <span className="visual-label">
+                  <Camera size={14} /> Imagem estática
+                </span>
+                <img
+                  src="/images/atelier-chair-poster.webp"
+                  width={1000}
+                  height={1000}
+                  alt="Vista fixa de uma poltrona em couro castanho e madeira"
+                  loading="lazy"
+                />
+              </div>
+              <figcaption>Uma imagem. Um único ângulo.</figcaption>
+            </figure>
+            <figure>
+              <div className="comparison-visual live-visual">
+                <span className="visual-label">
+                  <Expand size={14} /> Com a Reality Concept
+                </span>
+                <InteractiveProduct id="comparison-model" />
                 <button
-                  onClick={() => setStep(i)}
-                  aria-expanded={step === i}
-                  aria-controls={`step-${i}`}
+                  className="comparison-expand"
+                  aria-label="Abrir modelo 3D em ecrã completo"
+                  onClick={() => setModel("atelier")}
                 >
-                  <span className="step-number">0{i + 1}</span>
-                  <span>{item.label}</span>
-                  <Plus size={20} />
+                  <Expand size={17} />
                 </button>
-              </h3>
-              <div className="step-content" id={`step-${i}`} inert={step !== i}>
-                <div>
-                  <h4>{item.title}</h4>
-                  <p>{item.text}</p>
-                  <span className="step-detail">{item.detail}</span>
-                </div>
+                <button
+                  className="comparison-ar"
+                  onClick={() => setModel("atelier")}
+                >
+                  <QrCode size={16} /> Ver no meu espaço
+                </button>
               </div>
-            </div>
-          ))}
+              <figcaption>
+                Rode, descubra os detalhes e experimente com AR.
+              </figcaption>
+            </figure>
+          </div>
+          <div className="section-action">
+            <button
+              className="button button-secondary"
+              onClick={() => setModel("atelier")}
+            >
+              Abrir a experiência completa <ArrowRight size={16} />
+            </button>
+          </div>
+          <p className="model-credit">
+            Modelo de demonstração · <a href="/creditos">Créditos e licença</a>
+          </p>
         </div>
       </section>
-      <section className="integration section-pad">
-        <div className="integration-copy" data-reveal>
-          <span className="eyebrow">04 / NA SUA LOJA. À SUA MANEIRA.</span>
-          <h2>
-            Uma experiência
+      <section
+        id="faq"
+        className="faq-section section-block"
+        aria-labelledby="faq-title"
+      >
+        <div className="page-container">
+          <div className="section-heading" data-reveal>
+            <p className="eyebrow">FAQ</p>
+            <h2 id="faq-title">Tudo o que precisa de saber.</h2>
+          </div>
+          <div className="faq-list" data-reveal>
+            {faqs.map(([question, answer]) => (
+              <details key={question}>
+                <summary>
+                  {question}
+                  <ArrowDown size={18} />
+                </summary>
+                <p>{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section
+        id="contacto"
+        className="final-cta section-block"
+        aria-labelledby="cta-title"
+      >
+        <div className="page-container" data-reveal>
+          <p className="eyebrow">DÊ UMA NOVA DIMENSÃO À SUA MARCA</p>
+          <h2 id="cta-title">
+            O próximo produto que ganha vida
             <br />
-            que encaixa <em>em si.</em>
+            pode ser o seu.
           </h2>
           <p>
-            A sua identidade, os seus produtos, a sua loja.
-            <br />
-            Uma nova forma de os apresentar.
+            Uma primeira conversa para conhecer o catálogo, explorar a
+            tecnologia e definir o próximo passo.
           </p>
-          <ul>
-            <li>
-              <Check size={16} />
-              Integração com Shopify, WooCommerce e mais
-            </li>
-            <li>
-              <Check size={16} />
-              Modelos alojados na nossa infraestrutura
-            </li>
-            <li>
-              <Check size={16} />
-              3D no computador. AR no telemóvel compatível.
-            </li>
-          </ul>
-          <a href="#contacto" className="text-link">
-            Vamos falar da sua loja <ArrowUpRight size={17} />
-          </a>
-        </div>
-        <div className="store-preview" data-reveal>
-          <div className="store-browser">
-            <span />
-            <span />
-            <span />
-            <div>A SUA LOJA / PRODUTO</div>
-            <ArrowUpRight size={12} />
+          <div className="button-row">
+            <a href="/contacto" className="button button-primary">
+              Marcar uma demo
+            </a>
+            <a href="#modelos" className="button button-dark-outline">
+              Experimentar um modelo ao vivo
+            </a>
           </div>
-          <div className="store-brand">
-            a sua marca<span>OBJETOS PARA VIVER.</span>
-          </div>
-          <div className="store-product">
-            <img
-              src="/images/atelier-chair-poster.webp"
-              alt="Pré-visualização de uma poltrona num exemplo de página de produto"
-              loading="lazy"
-              width="600"
-              height="600"
-            />
-            <button onClick={() => setModel("atelier")}>
-              <span>3D</span>Explorar a peça
-              <Expand size={14} />
-            </button>
-          </div>
-          <div className="store-detail">
-            <span>COLEÇÃO / SALA</span>
-            <h3>Poltrona em couro</h3>
-            <p>Um lugar para ficar.</p>
-            <button onClick={() => setModel("atelier")}>
-              Ver no meu espaço <ArrowUpRight size={15} />
-            </button>
-          </div>
-          <p className="store-example">EXEMPLO ILUSTRATIVO DE INTEGRAÇÃO</p>
         </div>
       </section>
-      <section id="faq" className="faq section-pad">
-        <div className="faq-heading" data-reveal>
-          <span className="eyebrow">05 / SEM PONTAS SOLTAS</span>
-          <h2>
-            É natural ter
-            <br />
-            <em>perguntas.</em>
-          </h2>
-          <a href="mailto:rodriguez@realityconcept3d.com" className="text-link">
-            Estamos por aqui <ArrowUpRight size={17} />
-          </a>
-        </div>
-        <div className="faq-list" data-reveal>
-          {faqs.map(([question, answer], i) => (
-            <details key={question}>
-              <summary>
-                <span className="faq-number">0{i + 1}</span>
-                {question}
-                <Plus size={20} />
-              </summary>
-              <div className="faq-answer">
-                <p>{answer}</p>
-              </div>
-            </details>
-          ))}
-        </div>
-      </section>
-      <ContactSection />
       {model && <ExperienceDialog kind={model} onClose={closeModel} />}
     </>
   );

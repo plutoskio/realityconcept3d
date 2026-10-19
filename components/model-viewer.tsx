@@ -36,7 +36,6 @@ export function ModelViewer({
   kind = "lounge",
   variant = "Mango Velvet",
   interactive = true,
-  autoRotate = false,
   onReady,
   className = "",
   id,
@@ -44,7 +43,6 @@ export function ModelViewer({
   kind?: ModelKind;
   variant?: string;
   interactive?: boolean;
-  autoRotate?: boolean;
   onReady?: (viewer: ModelViewerElement) => void;
   className?: string;
   id?: string;
@@ -52,7 +50,6 @@ export function ModelViewer({
   const ref = useRef<ModelViewerElement>(null);
   const callbackRef = useRef(onReady);
   const [loaded, setLoaded] = useState(false);
-  const presentationClock = useRef(0);
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
   callbackRef.current = onReady;
@@ -80,28 +77,11 @@ export function ModelViewer({
       viewer?.removeEventListener("error", error);
     };
   }, [kind, retry]);
-  useEffect(() => {
-    const viewer = ref.current;
-    if (!autoRotate || !loaded || !viewer) return;
-    let frame = 0;
-    let previous = performance.now();
-    const present = (time: number) => {
-      const elapsed = Math.min(time - previous, 64);
-      previous = time;
-      if (viewer.modelIsVisible && document.visibilityState === "visible") {
-        presentationClock.current += elapsed;
-        viewer.resetTurntableRotation(
-          Math.sin(presentationClock.current * 0.0003) * 0.18,
-        );
-      }
-      frame = requestAnimationFrame(present);
-    };
-    frame = requestAnimationFrame(present);
-    return () => cancelAnimationFrame(frame);
-  }, [autoRotate, loaded, kind]);
   const model = modelInfo[kind];
   return (
-    <div className={`model-wrap ${loaded ? "model-loaded" : ""} ${className}`}>
+    <div
+      className={`model-wrap ${loaded ? "model-loaded" : ""} ${failed ? "model-failed" : ""} ${className}`}
+    >
       <img
         className="model-static-poster"
         src={
@@ -127,7 +107,9 @@ export function ModelViewer({
             : `Apresentação 3D — ${model.name}.`,
           "camera-controls": interactive ? "" : undefined,
           "touch-action": "pan-y",
-          "disable-zoom": interactive ? undefined : "",
+          "disable-zoom": "",
+          tabIndex: interactive ? 0 : -1,
+          inert: !interactive,
           "disable-pan": "",
           "camera-orbit": model.orbit,
           "min-camera-orbit": "auto 35deg 80%",

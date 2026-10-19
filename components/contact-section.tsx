@@ -3,17 +3,17 @@ import { ContactForm } from "./contact-form";
 
 export function ContactSection() {
   return (
-    <section id="contacto" className="contact section-pad">
+    <section id="contacto" className="contact page-container">
       <div className="contact-intro" data-reveal>
         <span className="eyebrow">
           <span className="status-dot" />
           VAMOS CRIAR ALGO COM DIMENSÃO.
         </span>
-        <h2>
+        <h1>
           O próximo
           <br />
           passo é <em>seu.</em>
-        </h2>
+        </h1>
         <p>
           Mostre-nos uma peça. Conte-nos uma ideia.
           <br />

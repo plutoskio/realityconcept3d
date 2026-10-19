@@ -94,7 +94,7 @@ export function ExperienceDialog({
           </div>
           <div className="experience-heading">
             <h2 id="experience-title">Uma nova perspetiva.</h2>
-            <p>Rode. Aproxime. Explore cada detalhe.</p>
+            <p>Rode a peça e descubra cada detalhe.</p>
           </div>
           <ModelViewer
             kind={kind}
